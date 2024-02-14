@@ -1,0 +1,10 @@
+yum install java-1.8.0-openjdk -y
+mkdir /app
+cd /app
+sudo wget -O nexus.tar.gz https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+tar -zxvf nexus.tar.gz
+rm -rf nexus.tar.gz
+mv nexus-3.64.0-04 nexus
+useradd nexus
+chown nexus:nexus nexus sonatype-work -R
+vim nexus/bin/nexus.rc

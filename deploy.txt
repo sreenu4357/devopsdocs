@@ -1,0 +1,23 @@
+node{
+    stage("code"){
+        git "https://github.com/mahesh-kadirisani/sourcecode.git"
+    }
+    stage("Build"){
+        def mavenHome= tool name: "maven", type: "maven"
+        def mavenCMD= "${mavenHome/bin/mvn}"
+        sh "${mavenCMD} clean package"
+    }
+    stage("CQA"){
+        withSonarQubeEnv("mySonar"){
+            def mavenHome= tool name: "maven", type: "maven"
+            def mavenCMD= "${mavenHome/bin/mvn}"
+            sh "${mavenCMD} sonar:sonar"
+        }
+    }
+    stage("Store"){
+        nexusArtifactUploader artifacts: [[artifactId: 'myweb', classifier: '', file: 'target/myweb-8.5.5.war', type: 'war']], credentialsId: 'nexus', groupId: 'in.javahome', nexusUrl: '65.0.179.172:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'mahe', version: '8.5.5'
+    }
+    stage("Deploy"){
+        sh "scp -o StrictHostKeyChecking=no target/myweb-8.5.5.war ec2-user@65.0.100.164:/home/ec2-user/apache-tomcat-9.0.85/webapps/mahe.war"
+    }
+}
